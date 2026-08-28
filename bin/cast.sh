@@ -164,13 +164,13 @@ PY
 
 VIDEO_ID="$(extract_video_id "$YT_URL")"
 HERE="$(cd "$(dirname "$0")" && pwd)"
-QUEUE_PY="${HERE}/cast_queue_watch.py"
+LOUNGE_PY="${HERE}/yt_lounge.py"
 
 echo "Casting video ID: $VIDEO_ID to $TV_IP (${MODE})"
 
 if [[ "$MODE" == "queue" ]]; then
   set +e
-  python3 "$QUEUE_PY" --ip "$TV_IP" --add "$VIDEO_ID"
+  python3 "$LOUNGE_PY" --ip "$TV_IP" --queue "$VIDEO_ID"
   queue_rc=$?
   set -e
   if [[ "$queue_rc" -eq 0 ]]; then

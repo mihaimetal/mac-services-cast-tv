@@ -7,9 +7,7 @@ Safari runs **Services** inside a sandbox, so the Service does not talk to the T
 Two Services:
 
 - **Cast to TV** — play the video now
-- **Queue on TV** — do not interrupt; start this video when the current one is about to end
-
-Samsung's YouTube app does not honor the usual “add to queue” API, so Queue waits for the current playback to finish and then launches the next URL.
+- **Queue on TV** — add to the TV YouTube queue (native “Video added” toast; does not interrupt)
 
 ```
 selected YouTube URL
@@ -50,7 +48,7 @@ cast.sh --queue 'https://youtu.be/dQw4w9WgXcQ'
 cast.sh 192.168.0.111 'https://youtu.be/dQw4w9WgXcQ'
 ```
 
-**Queue on TV** watches the current video (via YouTube Lounge nowPlaying) and DIAL-launches the next one ~2.5s before the end. If YouTube is not already playing, it falls back to play-now. A macOS notification confirms the item was queued.
+**Queue on TV** uses the YouTube Lounge `addVideo` command so the TV itself queues the clip and shows **Video added**. If YouTube is not already playing, it falls back to play-now.
 
 The first time the script sends a remote key, the TV may ask to allow this Mac. Accept it. Token is stored at `~/.samsung_tv_token.txt` (not in git).
 
@@ -63,7 +61,7 @@ The first time the script sends a remote key, the TV may ask to allow this Mac. 
 | Path | Role |
 |---|---|
 | `bin/cast.sh` | Play now (DIAL + ENTER) or `--queue` |
-| `bin/cast_queue_watch.py` | Play-next watcher for Queue on TV |
+| `bin/yt_lounge.py` | Lounge `addVideo` for Queue on TV |
 | `macos/CastToTV.swift` | Source for the `casttv://` helper app |
 | `macos/Cast to TV.workflow` | Play-now Service |
 | `macos/Queue on TV.workflow` | Queue Service |
