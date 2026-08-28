@@ -4,7 +4,7 @@ set -euo pipefail
 # Install this repo onto the current Mac:
 #   ~/.local/bin/cast.sh
 #   ~/.local/bin/yt_lounge.py
-#   ~/Applications/CastToTV.app   (casttv:// URL handler)
+#   ~/Applications/CastToTV.app   (Swift casttv:// URL handler)
 #   ~/Library/Services/Cast to TV.workflow
 #   ~/Library/Services/Queue on TV.workflow
 
@@ -28,23 +28,47 @@ python3 -m pip install -q -r "${ROOT}/requirements.txt"
 echo "==> Building ${APP_DST}"
 mkdir -p "${HOME}/Applications"
 osascript -e 'tell application "CastToTV" to quit' >/dev/null 2>&1 || true
-/usr/bin/osacompile -o "${APP_DST}" "${ROOT}/macos/CastToTV.applescript"
+killall CastToTV >/dev/null 2>&1 || true
+
+BIN_TMP="$(mktemp /tmp/CastToTV.XXXXXX)"
+/usr/bin/swiftc -O -parse-as-library \
+  -target arm64-apple-macos13.0 \
+  -o "${BIN_TMP}" \
+  "${ROOT}/macos/CastToTV.swift"
+
+rm -rf "${APP_DST}"
+mkdir -p "${APP_DST}/Contents/MacOS" "${APP_DST}/Contents/Resources"
+cp "${BIN_TMP}" "${APP_DST}/Contents/MacOS/CastToTV"
+chmod 755 "${APP_DST}/Contents/MacOS/CastToTV"
+printf 'APPL????' > "${APP_DST}/Contents/PkgInfo"
+rm -f "${BIN_TMP}"
 
 python3 - "${APP_DST}/Contents/Info.plist" <<'PY'
 import plistlib, sys
 from pathlib import Path
 
 plist_path = Path(sys.argv[1])
-data = plistlib.loads(plist_path.read_bytes())
-data["CFBundleIdentifier"] = "com.mihai.casttv.helper"
-data["CFBundleName"] = "CastToTV"
-data["OSAAppletShowStartupScreen"] = False
-data["CFBundleURLTypes"] = [
-    {
-        "CFBundleURLName": "com.mihai.casttv.helper",
-        "CFBundleURLSchemes": ["casttv"],
-    }
-]
+data = {
+    "CFBundleDevelopmentRegion": "en",
+    "CFBundleExecutable": "CastToTV",
+    "CFBundleIdentifier": "com.mihai.casttv.helper",
+    "CFBundleInfoDictionaryVersion": "6.0",
+    "CFBundleName": "CastToTV",
+    "CFBundlePackageType": "APPL",
+    "CFBundleShortVersionString": "1.1",
+    "CFBundleVersion": "1.1",
+    "CFBundleURLTypes": [
+        {
+            "CFBundleURLName": "com.mihai.casttv.helper",
+            "CFBundleURLSchemes": ["casttv"],
+            "CFBundleTypeRole": "Viewer",
+        }
+    ],
+    "LSMinimumSystemVersion": "13.0",
+    "LSUIElement": True,
+    "NSHighResolutionCapable": True,
+    "NSPrincipalClass": "NSApplication",
+}
 plist_path.write_bytes(plistlib.dumps(data))
 PY
 

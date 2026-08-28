@@ -60,9 +60,10 @@
 				<dict>
 					<key>COMMAND_STRING</key>
 					<string># Safari runs this Service inside its sandbox. Hand the URL to CastToTV.app
-# with a queue/ prefix so it adds to the YouTube queue instead of playing now.
+# as a queue request so it plays after the current video.
 for url in "$@"; do
-    /usr/bin/open "casttv://queue/$(/usr/bin/printf %s "$url" | /usr/bin/base64 | /usr/bin/tr -d '\n')"
+    payload="$(/usr/bin/printf %s "$url" | /usr/bin/base64 | /usr/bin/tr '+/' '-_' | /usr/bin/tr -d '=\n')"
+    /usr/bin/open "casttv://queue?u=${payload}"
 done</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>

@@ -1,6 +1,7 @@
 .DS_Store
 __pycache__/
 *.pyc
+macos/.build/
 .samsung_tv_token.txt
 .samsung_tv_ip.txt
 .cast_tv_remote_id.txt

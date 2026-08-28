@@ -63,7 +63,8 @@
 # Miniforge python, or the TV token file. So we just hand the URL off to the
 # unsandboxed CastToTV.app via its casttv:// URL scheme, which does the work.
 for url in "$@"; do
-    /usr/bin/open "casttv://$(/usr/bin/printf %s "$url" | /usr/bin/base64 | /usr/bin/tr -d '\n')"
+    payload="$(/usr/bin/printf %s "$url" | /usr/bin/base64 | /usr/bin/tr '+/' '-_' | /usr/bin/tr -d '=\n')"
+    /usr/bin/open "casttv://play?u=${payload}"
 done</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>

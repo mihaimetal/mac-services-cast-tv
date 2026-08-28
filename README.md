@@ -64,7 +64,7 @@ The first time the script sends a remote key, the TV may ask to allow this Mac. 
 |---|---|
 | `bin/cast.sh` | Play now (DIAL + ENTER) or `--queue` |
 | `bin/cast_queue_watch.py` | Play-next watcher for Queue on TV |
-| `macos/CastToTV.applescript` | Source for the `casttv://` helper app |
+| `macos/CastToTV.swift` | Source for the `casttv://` helper app |
 | `macos/Cast to TV.workflow` | Play-now Service |
 | `macos/Queue on TV.workflow` | Queue Service |
 | `deploy.sh` | Install onto this Mac |
