@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+*.pyc
+.samsung_tv_token.txt
+.samsung_tv_ip.txt
+cast.log
