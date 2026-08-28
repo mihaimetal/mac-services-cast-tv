@@ -15,18 +15,15 @@ LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchS
 
 export PATH="${HOME}/Miniforge3/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-echo "==> Installing ${BIN_DIR}/cast.sh and yt_lounge.py"
+echo "==> Installing ${BIN_DIR}/cast.sh and helpers"
 mkdir -p "${BIN_DIR}"
 cp "${ROOT}/bin/cast.sh" "${BIN_DIR}/cast.sh"
 cp "${ROOT}/bin/yt_lounge.py" "${BIN_DIR}/yt_lounge.py"
-chmod 755 "${BIN_DIR}/cast.sh" "${BIN_DIR}/yt_lounge.py"
+cp "${ROOT}/bin/cast_queue_watch.py" "${BIN_DIR}/cast_queue_watch.py"
+chmod 755 "${BIN_DIR}/cast.sh" "${BIN_DIR}/yt_lounge.py" "${BIN_DIR}/cast_queue_watch.py"
 
-echo "==> Installing Python package samsungtvws"
-if ! python3 -c "import samsungtvws" >/dev/null 2>&1; then
-  python3 -m pip install -r "${ROOT}/requirements.txt"
-else
-  echo "    already present ($(python3 -c 'import importlib.metadata as m; print(m.version("samsungtvws"))'))"
-fi
+echo "==> Installing Python packages"
+python3 -m pip install -q -r "${ROOT}/requirements.txt"
 
 echo "==> Building ${APP_DST}"
 mkdir -p "${HOME}/Applications"
@@ -65,6 +62,29 @@ for service in "Cast to TV.workflow" "Queue on TV.workflow"; do
   rm -rf "${dst}"
   cp -R "${src}" "${dst}"
 done
+echo "==> Enabling Services in the menu"
+python3 - <<'PY'
+import plistlib, subprocess, tempfile
+from pathlib import Path
+
+raw = subprocess.check_output(["defaults", "export", "pbs", "-"])
+data = plistlib.loads(raw)
+status = data.setdefault("NSServicesStatus", {})
+for name in ("Cast to TV", "Queue on TV"):
+    key = f"(null) - {name} - runWorkflowAsService"
+    status[key] = {
+        "presentation_modes": {
+            "ContextMenu": True,
+            "ServicesMenu": True,
+            "TouchBar": True,
+        }
+    }
+tmp = Path(tempfile.mkstemp(suffix=".plist")[1])
+tmp.write_bytes(plistlib.dumps(data, fmt=plistlib.FMT_XML))
+subprocess.check_call(["defaults", "import", "pbs", str(tmp)])
+tmp.unlink(missing_ok=True)
+PY
+killall pbs >/dev/null 2>&1 || true
 /System/Library/CoreServices/pbs >/dev/null 2>&1 || true
 
 echo
@@ -74,6 +94,6 @@ echo "  Queue:   ${BIN_DIR}/cast.sh --queue <youtube_url>"
 echo "  Service: select a YouTube URL → Services → Cast to TV / Queue on TV"
 echo "  Log:     ${HOME}/.local/share/cast.log"
 echo
-echo "Queue on TV only works if YouTube is already playing on the TV."
+echo "Queue on TV waits until the current video is almost over, then starts the next."
+echo "If Queue on TV is missing from the menu, quit Safari and open it again."
 echo "First remote keypress: allow this Mac on the TV if it prompts."
-echo "If a Service menu item is missing, log out or run: killall Finder"

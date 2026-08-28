@@ -71,7 +71,7 @@ PY
 usage() {
   echo "Usage: $0 [--queue] [tv_ip] <youtube_url>"
   echo "  (default)  play the video now"
-  echo "  --queue    add to the TV YouTube queue (requires YouTube already playing)"
+  echo "  --queue    play after the current video (does not interrupt)"
   echo "Example: $0 https://youtu.be/BOUeZJDa4pU"
   echo "Example: $0 --queue https://youtu.be/BOUeZJDa4pU"
 }
@@ -164,23 +164,23 @@ PY
 
 VIDEO_ID="$(extract_video_id "$YT_URL")"
 HERE="$(cd "$(dirname "$0")" && pwd)"
-LOUNGE_PY="${HERE}/yt_lounge.py"
+QUEUE_PY="${HERE}/cast_queue_watch.py"
 
 echo "Casting video ID: $VIDEO_ID to $TV_IP (${MODE})"
 
 if [[ "$MODE" == "queue" ]]; then
   set +e
-  python3 "$LOUNGE_PY" --ip "$TV_IP" --queue "$VIDEO_ID"
-  lounge_rc=$?
+  python3 "$QUEUE_PY" --ip "$TV_IP" --add "$VIDEO_ID"
+  queue_rc=$?
   set -e
-  if [[ "$lounge_rc" -eq 0 ]]; then
+  if [[ "$queue_rc" -eq 0 ]]; then
     exit 0
   fi
-  if [[ "$lounge_rc" -eq 2 ]]; then
-    echo "Falling back to play-now."
+  if [[ "$queue_rc" -eq 2 ]]; then
+    echo "YouTube is not already playing; starting this video now."
   else
-    echo "Queue failed (exit $lounge_rc)."
-    exit "$lounge_rc"
+    echo "Queue failed (exit $queue_rc)."
+    exit "$queue_rc"
   fi
 fi
 

@@ -23,6 +23,7 @@ on open location this_URL
 	end if
 	set theCmd to "mkdir -p \"$HOME/.local/share\"; " & ¬
 		"{ echo \"=== $(date) ===\"; " & ¬
+		"echo raw: " & quoted form of this_URL & "; " & ¬
 		"URL=$(printf %s " & quoted form of b64 & " | base64 -D); " & ¬
 		"echo \"decoded: $URL modeFlag=" & modeFlag & "\"; " & ¬
 		"export PATH=\"$HOME/Miniforge3/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin\"; " & ¬
