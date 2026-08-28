@@ -4,6 +4,11 @@ Cast a YouTube URL from macOS to a Samsung Tizen TV.
 
 Safari runs **Services** inside a sandbox, so the Service does not talk to the TV itself. It base64-encodes the selected URL and opens `casttv://…`. **CastToTV.app** handles that scheme unsandboxed and runs `cast.sh`.
 
+Two Services:
+
+- **Cast to TV** — play the video now
+- **Queue on TV** — add it to the YouTube queue (YouTube must already be playing)
+
 ```
 selected YouTube URL
         │
@@ -24,7 +29,7 @@ cd ~/DEV/cast
 ./deploy.sh
 ```
 
-That copies `cast.sh`, builds `CastToTV.app` with the `casttv://` handler, and installs the **Cast to TV** Service.
+That copies `cast.sh`, builds `CastToTV.app` with the `casttv://` handler, and installs the **Cast to TV** and **Queue on TV** Services.
 
 Needs:
 
@@ -34,13 +39,16 @@ Needs:
 
 ## Use
 
-- Select a YouTube URL (Safari, or any app that offers Services on text) → **Services → Cast to TV**
+- Select a YouTube URL (Safari, or any app that offers Services on text) → **Services → Cast to TV** (play now) or **Queue on TV** (append to the current queue)
 - Or from a terminal:
 
 ```bash
 cast.sh 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+cast.sh --queue 'https://youtu.be/dQw4w9WgXcQ'
 cast.sh 192.168.0.111 'https://youtu.be/dQw4w9WgXcQ'
 ```
+
+**Queue on TV** talks to YouTube's Lounge API using the TV's DIAL `screenId`. It does not interrupt the current video. If YouTube is not already playing, it falls back to play-now.
 
 The first time the script sends a remote key, the TV may ask to allow this Mac. Accept it. Token is stored at `~/.samsung_tv_token.txt` (not in git).
 
@@ -52,9 +60,11 @@ The first time the script sends a remote key, the TV may ask to allow this Mac. 
 
 | Path | Role |
 |---|---|
-| `bin/cast.sh` | Launch YouTube + send ENTER to skip the profile screen |
+| `bin/cast.sh` | Play now (DIAL + ENTER) or `--queue` |
+| `bin/yt_lounge.py` | YouTube Lounge queue helper |
 | `macos/CastToTV.applescript` | Source for the `casttv://` helper app |
-| `macos/Cast to TV.workflow` | Automator Service |
+| `macos/Cast to TV.workflow` | Play-now Service |
+| `macos/Queue on TV.workflow` | Queue Service |
 | `deploy.sh` | Install onto this Mac |
 
 Log: `~/.local/share/cast.log`

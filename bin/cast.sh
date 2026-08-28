@@ -68,6 +68,36 @@ raise SystemExit(1)
 PY
 }
 
+usage() {
+  echo "Usage: $0 [--queue] [tv_ip] <youtube_url>"
+  echo "  (default)  play the video now"
+  echo "  --queue    add to the TV YouTube queue (requires YouTube already playing)"
+  echo "Example: $0 https://youtu.be/BOUeZJDa4pU"
+  echo "Example: $0 --queue https://youtu.be/BOUeZJDa4pU"
+}
+
+MODE=play
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --queue|-q) MODE=queue; shift ;;
+    --play|-p) MODE=play; shift ;;
+    -h|--help) usage; exit 0 ;;
+    --) shift; POSITIONAL+=("$@"); break ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+    *) POSITIONAL+=("$1"); shift ;;
+  esac
+done
+if [[ ${#POSITIONAL[@]} -gt 0 ]]; then
+  set -- "${POSITIONAL[@]}"
+else
+  set --
+fi
+
 # Check if the first argument matches the IPv4 regex
 explicit_ip=0
 if [[ "${1:-}" =~ $ipv4_regex ]]; then
@@ -84,8 +114,7 @@ else
 fi
 
 if [[ -z "$YT_URL" ]]; then
-  echo "Usage: $0 [tv_ip] <youtube_url>"
-  echo "Example: $0 https://youtu.be/BOUeZJDa4pU"
+  usage >&2
   exit 1
 fi
 
@@ -134,8 +163,26 @@ PY
 }
 
 VIDEO_ID="$(extract_video_id "$YT_URL")"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+LOUNGE_PY="${HERE}/yt_lounge.py"
 
-echo "Casting video ID: $VIDEO_ID to $TV_IP"
+echo "Casting video ID: $VIDEO_ID to $TV_IP (${MODE})"
+
+if [[ "$MODE" == "queue" ]]; then
+  set +e
+  python3 "$LOUNGE_PY" --ip "$TV_IP" --queue "$VIDEO_ID"
+  lounge_rc=$?
+  set -e
+  if [[ "$lounge_rc" -eq 0 ]]; then
+    exit 0
+  fi
+  if [[ "$lounge_rc" -eq 2 ]]; then
+    echo "Falling back to play-now."
+  else
+    echo "Queue failed (exit $lounge_rc)."
+    exit "$lounge_rc"
+  fi
+fi
 
 # 1. Try port 8001 (Standard endpoint used by modern Samsung Tizen TVs)
 echo "Launching YouTube on TV..."

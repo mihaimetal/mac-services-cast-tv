@@ -59,11 +59,10 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string># Safari runs this Service inside its sandbox, which can't reach ~/Documents,
-# Miniforge python, or the TV token file. So we just hand the URL off to the
-# unsandboxed CastToTV.app via its casttv:// URL scheme, which does the work.
+					<string># Safari runs this Service inside its sandbox. Hand the URL to CastToTV.app
+# with a queue/ prefix so it adds to the YouTube queue instead of playing now.
 for url in "$@"; do
-    /usr/bin/open "casttv://$(/usr/bin/printf %s "$url" | /usr/bin/base64 | /usr/bin/tr -d '\n')"
+    /usr/bin/open "casttv://queue/$(/usr/bin/printf %s "$url" | /usr/bin/base64 | /usr/bin/tr -d '\n')"
 done</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
@@ -89,7 +88,7 @@ done</string>
 				<key>Class Name</key>
 				<string>RunShellScriptAction</string>
 				<key>InputUUID</key>
-				<string>C9F8E1A2-1B3C-4D5E-8F90-1234567890AB</string>
+				<string>229F9616-35D6-42A4-8000-1F2115648711</string>
 				<key>Keywords</key>
 				<array>
 					<string>Shell</string>
@@ -99,9 +98,9 @@ done</string>
 					<string>Unix</string>
 				</array>
 				<key>OutputUUID</key>
-				<string>D0A9F2B3-2C4D-5E6F-9A01-234567890ABC</string>
+				<string>4A142EA0-CB08-4618-8827-C9130A9B0FF6</string>
 				<key>UUID</key>
-				<string>E1BAF3C4-3D5E-6F70-AB12-34567890ABCD</string>
+				<string>40CF2249-D721-4FF6-BEEC-B69ABEC07E45</string>
 				<key>UnlocalizedApplications</key>
 				<array>
 					<string>Automator</string>

@@ -3,4 +3,5 @@ __pycache__/
 *.pyc
 .samsung_tv_token.txt
 .samsung_tv_ip.txt
+.cast_tv_remote_id.txt
 cast.log
