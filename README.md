@@ -7,7 +7,7 @@ Safari runs **Services** inside a sandbox, so the Service does not talk to the T
 Two Services:
 
 - **Cast to TV** — play the video now
-- **Queue on TV** — add to the TV YouTube queue (native “Video added” toast; does not interrupt)
+- **Queue on TV** — play next on the TV (does not interrupt the current video)
 
 ```
 selected YouTube URL
@@ -39,7 +39,7 @@ Needs:
 
 ## Use
 
-- Select a YouTube URL (Safari, or any app that offers Services on text) → **Services → Cast to TV** (play now) or **Queue on TV** (append to the current queue)
+- Select a YouTube URL (Safari, or any app that offers Services on text) → **Services → Cast to TV** (play now) or **Queue on TV** (play next)
 - Or from a terminal:
 
 ```bash
@@ -48,7 +48,7 @@ cast.sh --queue 'https://youtu.be/dQw4w9WgXcQ'
 cast.sh 192.168.0.111 'https://youtu.be/dQw4w9WgXcQ'
 ```
 
-**Queue on TV** uses the YouTube Lounge `addVideo` command so the TV itself queues the clip and shows **Video added**. If YouTube is not already playing, it falls back to play-now.
+**Queue on TV** tells the TV to play that clip next (`insertVideo`). Current playback is not interrupted; skip or wait for the end to get the queued video. The TV often shows **Video added**. If YouTube is not already playing, it falls back to play-now.
 
 The first time the script sends a remote key, the TV may ask to allow this Mac. Accept it. Token is stored at `~/.samsung_tv_token.txt` (not in git).
 
